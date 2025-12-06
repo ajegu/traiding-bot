@@ -18,15 +18,25 @@ Application web Laravel pour automatiser le trading de cryptomonnaies sur Binanc
 
 ## Documentation détaillée
 
+### Suivi de Projet
+@.claude/docs/TODO.md
+
 ### Architecture et Fonctionnalités
 @.claude/docs/tech/architecture.md
-@.claude/docs/specs/strategies.md
 @.claude/docs/tech/security.md
 @.claude/docs/tech/installation.md
+@.claude/docs/specs/strategies.md
+@.claude/docs/specs/bot-execution.md
+@.claude/docs/specs/dashboard.md
+@.claude/docs/specs/notifications.md
+@.claude/docs/specs/order-management.md
+@.claude/docs/specs/reporting.md
+@.claude/docs/specs/trade-history.md
 
 ### Conventions et Bonnes Pratiques
 @.claude/docs/tech/laravel.md
 @.claude/docs/tech/aws.md
+@.claude/docs/tech/aws-cli-setup.md
 @.claude/docs/tech/aws-organizations.md
 @.claude/docs/tech/terraform.md
 @.claude/docs/tech/github-actions.md
@@ -51,7 +61,7 @@ Application web Laravel pour automatiser le trading de cryptomonnaies sur Binanc
 - Tester en testnet avant production
 
 ## Fonctionnalités Clés
-- Dashboard web avec prix en temps réel
+- Dashboard web avec prix en temps réel 
 - Stratégies RSI et Moyennes Mobiles
 - Commande Artisan : `php artisan bot:run`
 - Enregistrement automatique des trades en BDD
