@@ -49,7 +49,7 @@ aws configure sso
 # Répondre aux questions :
 # SSO session name: trading-bot
 # SSO start URL: https://your-org.awsapps.com/start
-# SSO region: eu-west-1
+# SSO region: eu-west-3
 # SSO registration scopes: sso:account:access
 ```
 
@@ -65,7 +65,7 @@ aws configure sso
 # -----------------------------------------------------------------------------
 [sso-session trading-bot]
 sso_start_url = https://your-org.awsapps.com/start
-sso_region = eu-west-1
+sso_region = eu-west-3
 sso_registration_scopes = sso:account:access
 
 # -----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ sso_registration_scopes = sso:account:access
 sso_session = trading-bot
 sso_account_id = 111111111111
 sso_role_name = AdministratorAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -84,7 +84,7 @@ cli_pager =
 sso_session = trading-bot
 sso_account_id = 111111111111
 sso_role_name = AdministratorAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -95,7 +95,7 @@ cli_pager =
 sso_session = trading-bot
 sso_account_id = 222222222222
 sso_role_name = ReadOnlyAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -104,7 +104,7 @@ cli_pager =
 sso_session = trading-bot
 sso_account_id = 222222222222
 sso_role_name = AdministratorAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -113,7 +113,7 @@ cli_pager =
 sso_session = trading-bot
 sso_account_id = 222222222222
 sso_role_name = ReadOnlyAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -124,7 +124,7 @@ cli_pager =
 sso_session = trading-bot
 sso_account_id = 111111111111
 sso_role_name = AdministratorAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -133,7 +133,7 @@ cli_pager =
 sso_session = trading-bot
 sso_account_id = 111111111111
 sso_role_name = AdministratorAccess
-region = eu-west-1
+region = eu-west-3
 output = json
 cli_pager =
 
@@ -145,7 +145,7 @@ cli_pager =
 [profile trading-bot-prod-deploy]
 role_arn = arn:aws:iam::222222222222:role/TerraformDeployRole
 source_profile = trading-bot-dev
-region = eu-west-1
+region = eu-west-3
 output = json
 ```
 
@@ -200,7 +200,7 @@ aws sso login --sso-session trading-bot
 
 # Profil par défaut pour ce projet
 export AWS_PROFILE=trading-bot-dev
-export AWS_REGION=eu-west-1
+export AWS_REGION=eu-west-3
 
 # Alias pratiques
 alias aws-dev='export AWS_PROFILE=trading-bot-dev'
@@ -260,7 +260,7 @@ variable "aws_profile" {
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "eu-west-1"
+  default     = "eu-west-3"
 }
 ```
 
@@ -379,7 +379,7 @@ aws sns list-topics --profile trading-bot-dev
 
 # Publier un message de test
 aws sns publish \
-  --topic-arn arn:aws:sns:eu-west-1:123456789012:trading-bot-dev-sns-trade-alerts \
+  --topic-arn arn:aws:sns:eu-west-3:123456789012:trading-bot-dev-sns-trade-alerts \
   --message '{"type":"TEST","data":"Hello from CLI"}' \
   --profile trading-bot-dev
 ```
@@ -392,19 +392,19 @@ aws sqs list-queues --profile trading-bot-dev
 
 # Voir le nombre de messages en attente
 aws sqs get-queue-attributes \
-  --queue-url https://sqs.eu-west-1.amazonaws.com/123456789012/trading-bot-dev-orders \
+  --queue-url https://sqs.eu-west-3.amazonaws.com/123456789012/trading-bot-dev-orders \
   --attribute-names ApproximateNumberOfMessages \
   --profile trading-bot-dev
 
 # Recevoir des messages (debug)
 aws sqs receive-message \
-  --queue-url https://sqs.eu-west-1.amazonaws.com/123456789012/trading-bot-dev-orders \
+  --queue-url https://sqs.eu-west-3.amazonaws.com/123456789012/trading-bot-dev-orders \
   --max-number-of-messages 1 \
   --profile trading-bot-dev
 
 # Purger une queue (ATTENTION: supprime tous les messages)
 aws sqs purge-queue \
-  --queue-url https://sqs.eu-west-1.amazonaws.com/123456789012/trading-bot-dev-orders \
+  --queue-url https://sqs.eu-west-3.amazonaws.com/123456789012/trading-bot-dev-orders \
   --profile trading-bot-dev
 ```
 
@@ -567,7 +567,7 @@ Pour un déploiement Terraform avec permissions minimales :
       "Resource": "*",
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-1"
+          "aws:RequestedRegion": "eu-west-3"
         }
       }
     }
@@ -619,7 +619,7 @@ aws dynamodb list-tables --profile trading-bot-dev
 
 ```bash
 # Spécifier la région explicitement
-aws dynamodb list-tables --region eu-west-1 --profile trading-bot-dev
+aws dynamodb list-tables --region eu-west-3 --profile trading-bot-dev
 
 # Vérifier la config du profil
 aws configure list --profile trading-bot-dev

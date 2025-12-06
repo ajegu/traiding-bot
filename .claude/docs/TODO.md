@@ -13,7 +13,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 
 ## Phase 1 : Infrastructure AWS (Terraform)
 
-- [~] **1.1** Backend Terraform (bucket S3 + table DynamoDB lock)
+- [x] **1.1** Backend Terraform (bucket S3 + table DynamoDB lock)
 - [ ] **1.2** Tables DynamoDB (trades, bot_config, reports)
 - [ ] **1.3** SSM Parameter Store (clés API Binance, token Telegram)
 - [ ] **1.4** SNS Topics (trade-alerts, error-alerts)
@@ -78,12 +78,12 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 
 | Phase | Progression | Statut |
 |-------|-------------|--------|
-| 1. Infrastructure AWS | 0/8 | Non commencé |
+| 1. Infrastructure AWS | 1/8 | En cours |
 | 2. Application Laravel | 0/13 | Non commencé |
 | 3. Dashboard Web | 0/9 | Non commencé |
 | 4. CI/CD | 0/4 | Non commencé |
 | 5. Tests & Docs | 0/4 | Non commencé |
-| **Total** | **0/38** | **0%** |
+| **Total** | **1/38** | **3%** |
 
 ---
 

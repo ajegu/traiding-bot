@@ -166,7 +166,7 @@ flowchart TB
 {
   "Type": "Notification",
   "MessageId": "uuid",
-  "TopicArn": "arn:aws:sns:eu-west-1:xxx:trading-bot-prod-sns-trade-alerts",
+  "TopicArn": "arn:aws:sns:eu-west-3:xxx:trading-bot-prod-sns-trade-alerts",
   "Subject": "Trade Executed: BUY BTCUSDT",
   "Message": "{\"type\":\"TRADE_EXECUTED\",\"data\":{...}}",
   "Timestamp": "2024-12-06T10:30:15.000Z",

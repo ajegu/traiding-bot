@@ -47,18 +47,18 @@
 # AWS Configuration
 AWS_ACCESS_KEY_ID=votre_access_key
 AWS_SECRET_ACCESS_KEY=votre_secret_key
-AWS_DEFAULT_REGION=eu-west-1
+AWS_DEFAULT_REGION=eu-west-3
 
 # DynamoDB
 DYNAMODB_TABLE_PREFIX=trading_bot_
 
 # SNS
-AWS_SNS_TOPIC_TRADES=arn:aws:sns:eu-west-1:xxxx:trading-alerts
-AWS_SNS_TOPIC_ERRORS=arn:aws:sns:eu-west-1:xxxx:trading-errors
+AWS_SNS_TOPIC_TRADES=arn:aws:sns:eu-west-3:xxxx:trading-alerts
+AWS_SNS_TOPIC_ERRORS=arn:aws:sns:eu-west-3:xxxx:trading-errors
 
 # SQS
-AWS_SQS_QUEUE_ORDERS=https://sqs.eu-west-1.amazonaws.com/xxxx/orders
-AWS_SQS_QUEUE_PRICES=https://sqs.eu-west-1.amazonaws.com/xxxx/prices
+AWS_SQS_QUEUE_ORDERS=https://sqs.eu-west-3.amazonaws.com/xxxx/orders
+AWS_SQS_QUEUE_PRICES=https://sqs.eu-west-3.amazonaws.com/xxxx/prices
 
 # Binance
 BINANCE_API_KEY=votre_cle_api
