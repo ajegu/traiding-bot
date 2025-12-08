@@ -14,7 +14,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 ## Phase 1 : Infrastructure AWS (Terraform)
 
 - [x] **1.1** Backend Terraform (bucket S3 + table DynamoDB lock)
-- [ ] **1.2** Tables DynamoDB (trades, bot_config, reports)
+- [~] **1.2** Tables DynamoDB (trades, bot_config, reports)
 - [ ] **1.3** SSM Parameter Store (clés API Binance, token Telegram)
 - [ ] **1.4** SNS Topics (trade-alerts, error-alerts)
 - [ ] **1.5** SQS Queues + DLQ (orders, notifications)

@@ -20,6 +20,7 @@ Application web Laravel pour automatiser le trading de cryptomonnaies sur Binanc
 
 ### Suivi de Projet
 @.claude/docs/TODO.md
+@.claude/task/*
 
 ### Architecture et Fonctionnalités
 @.claude/docs/tech/architecture.md
