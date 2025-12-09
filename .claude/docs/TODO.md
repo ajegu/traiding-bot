@@ -15,7 +15,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 
 - [x] **1.1** Backend Terraform (bucket S3 + table DynamoDB lock)
 - [x] **1.2** Tables DynamoDB (trades, bot_config, reports)
-- [ ] **1.3** SSM Parameter Store (clés API Binance, token Telegram)
+- [x] **1.3** SSM Parameter Store (clés API Binance, token Telegram)
 - [ ] **1.4** SNS Topics (trade-alerts, error-alerts)
 - [ ] **1.5** SQS Queues + DLQ (orders, notifications)
 - [ ] **1.6** EventBridge Rules (cron 5min bot, cron daily report)
@@ -78,12 +78,12 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 
 | Phase | Progression | Statut |
 |-------|-------------|--------|
-| 1. Infrastructure AWS | 2/8 | En cours |
+| 1. Infrastructure AWS | 3/8 | En cours |
 | 2. Application Laravel | 0/13 | Non commencé |
 | 3. Dashboard Web | 0/9 | Non commencé |
 | 4. CI/CD | 0/4 | Non commencé |
 | 5. Tests & Docs | 0/4 | Non commencé |
-| **Total** | **2/38** | **5%** |
+| **Total** | **3/38** | **8%** |
 
 ---
 

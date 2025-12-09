@@ -45,3 +45,16 @@ output "dynamodb_all_table_arns" {
   description = "Liste de tous les ARNs des tables DynamoDB"
   value       = module.dynamodb.all_table_arns
 }
+
+# =============================================================================
+# SSM Parameters Outputs
+# =============================================================================
+output "ssm_parameter_arns" {
+  description = "ARNs des paramètres SSM"
+  value       = module.ssm.parameter_arns
+}
+
+output "ssm_parameter_prefix" {
+  description = "Préfixe des paramètres SSM"
+  value       = module.ssm.parameter_name_prefix
+}
