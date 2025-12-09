@@ -50,3 +50,12 @@ variable "telegram_chat_id" {
   type        = string
   default     = "PLACEHOLDER_TO_UPDATE"
 }
+
+# =============================================================================
+# SNS Topics
+# =============================================================================
+variable "alert_email" {
+  description = "Email pour recevoir les alertes d'erreurs (optionnel)"
+  type        = string
+  default     = ""
+}

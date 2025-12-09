@@ -58,3 +58,16 @@ output "ssm_parameter_prefix" {
   description = "Préfixe des paramètres SSM"
   value       = module.ssm.parameter_name_prefix
 }
+
+# =============================================================================
+# SNS Topics Outputs
+# =============================================================================
+output "sns_trade_alerts_topic_arn" {
+  description = "ARN du topic SNS pour les alertes de trades"
+  value       = module.sns.trade_alerts_topic_arn
+}
+
+output "sns_error_alerts_topic_arn" {
+  description = "ARN du topic SNS pour les alertes d'erreurs"
+  value       = module.sns.error_alerts_topic_arn
+}
