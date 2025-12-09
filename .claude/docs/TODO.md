@@ -93,3 +93,4 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 - La Phase 2 peut démarrer en parallèle pour le développement local
 - Toujours tester sur Binance Testnet avant de passer en production
 - Respecter les limites AWS Free Tier (voir `.claude/docs/tech/aws.md`)
+- Chaque tâche est détaillée dans un fichier spécifique que l'on retrouve dans le dossier `.claude/tasks`
