@@ -71,3 +71,26 @@ output "sns_error_alerts_topic_arn" {
   description = "ARN du topic SNS pour les alertes d'erreurs"
   value       = module.sns.error_alerts_topic_arn
 }
+
+# =============================================================================
+# SQS Queues Outputs
+# =============================================================================
+output "sqs_orders_queue_url" {
+  description = "URL de la queue SQS orders"
+  value       = module.sqs.orders_queue_url
+}
+
+output "sqs_orders_queue_arn" {
+  description = "ARN de la queue SQS orders"
+  value       = module.sqs.orders_queue_arn
+}
+
+output "sqs_notifications_queue_url" {
+  description = "URL de la queue SQS notifications"
+  value       = module.sqs.notifications_queue_url
+}
+
+output "sqs_notifications_queue_arn" {
+  description = "ARN de la queue SQS notifications"
+  value       = module.sqs.notifications_queue_arn
+}

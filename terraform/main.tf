@@ -44,3 +44,20 @@ module "sns" {
   aws_account_id = data.aws_caller_identity.current.account_id
   alert_email    = var.alert_email
 }
+
+# =============================================================================
+# SQS Queues
+# =============================================================================
+module "sqs" {
+  source = "./modules/sqs"
+
+  environment    = var.environment
+  project_name   = var.project_name
+  common_tags    = local.common_tags
+  aws_region     = data.aws_region.current.name
+  aws_account_id = data.aws_caller_identity.current.account_id
+
+  sns_topic_arns = module.sns.topic_arns
+
+  depends_on = [module.sns]
+}
