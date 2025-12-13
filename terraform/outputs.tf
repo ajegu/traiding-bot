@@ -130,3 +130,26 @@ output "lambda_execution_role_name" {
   description = "Nom du rôle d'exécution Lambda"
   value       = module.iam.lambda_exec_role_name
 }
+
+# =============================================================================
+# Lambda Functions Outputs
+# =============================================================================
+output "lambda_bot_executor_arn" {
+  description = "ARN de la fonction Lambda bot executor"
+  value       = module.lambda.bot_executor_function_arn
+}
+
+output "lambda_bot_executor_name" {
+  description = "Nom de la fonction Lambda bot executor"
+  value       = module.lambda.bot_executor_function_name
+}
+
+output "lambda_daily_report_arn" {
+  description = "ARN de la fonction Lambda daily report"
+  value       = module.lambda.daily_report_function_arn
+}
+
+output "lambda_daily_report_name" {
+  description = "Nom de la fonction Lambda daily report"
+  value       = module.lambda.daily_report_function_name
+}

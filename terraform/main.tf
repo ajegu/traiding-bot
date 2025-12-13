@@ -95,3 +95,38 @@ module "iam" {
 
   depends_on = [module.dynamodb, module.sns, module.sqs]
 }
+
+# =============================================================================
+# Lambda Functions
+# =============================================================================
+module "lambda" {
+  source = "./modules/lambda"
+
+  environment  = var.environment
+  project_name = var.project_name
+  common_tags  = local.common_tags
+
+  lambda_exec_role_arn = module.iam.lambda_exec_role_arn
+  lambda_zip_path      = "${path.module}/placeholder.zip"
+  bref_layers          = var.bref_layers
+
+  # DynamoDB
+  dynamodb_trades_table_name     = module.dynamodb.trades_table_name
+  dynamodb_bot_config_table_name = module.dynamodb.bot_config_table_name
+  dynamodb_reports_table_name    = module.dynamodb.reports_table_name
+
+  # SNS
+  sns_trade_alerts_topic_arn = module.sns.trade_alerts_topic_arn
+  sns_error_alerts_topic_arn = module.sns.error_alerts_topic_arn
+
+  # SQS
+  sqs_orders_queue_url = module.sqs.orders_queue_url
+
+  # EventBridge
+  eventbridge_bot_rule_name    = module.eventbridge.bot_executor_rule_name
+  eventbridge_bot_rule_arn     = module.eventbridge.bot_executor_rule_arn
+  eventbridge_report_rule_name = module.eventbridge.daily_report_rule_name
+  eventbridge_report_rule_arn  = module.eventbridge.daily_report_rule_arn
+
+  depends_on = [module.iam, module.dynamodb, module.sns, module.sqs, module.eventbridge]
+}

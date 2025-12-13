@@ -74,3 +74,17 @@ variable "eventbridge_report_enabled" {
   type        = bool
   default     = false
 }
+
+# =============================================================================
+# Lambda Functions
+# =============================================================================
+variable "bref_layers" {
+  description = "ARNs des layers Bref pour PHP"
+  type        = list(string)
+  default = [
+    # Bref PHP 8.4 layer pour eu-west-3
+    # https://runtimes.bref.sh/
+    "arn:aws:lambda:eu-west-3:534081306603:layer:php-84:35",
+    "arn:aws:lambda:eu-west-3:534081306603:layer:console:116"
+  ]
+}

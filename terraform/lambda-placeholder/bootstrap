@@ -1,0 +1,5 @@
+#!/bin/sh
+# Placeholder bootstrap for Lambda custom runtime
+# This will be replaced by Bref during actual deployment
+
+echo '{"statusCode": 200, "body": "Placeholder - deploy real code via CI/CD"}'
