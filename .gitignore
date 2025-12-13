@@ -1,3 +1,43 @@
-terraform/.terraform
-terraform/bootstrap/.terraform
+*.log
 .DS_Store
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+npm-debug.log
+yarn-error.log
+
+# Lambda / Bref
+.bref/
+
+# IDE
+*.swp
+*.swo
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/*.tfvars
+terraform/placeholder.zip
+!terraform/.terraform.lock.hcl
+terraform/bootstrap/

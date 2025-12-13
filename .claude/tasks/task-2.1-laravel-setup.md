@@ -19,19 +19,31 @@ Initialiser le projet Laravel 12 avec Bref pour le déploiement sur AWS Lambda, 
 ```
 trading-bot/
 ├── app/
-│   ├── Console/Commands/
-│   ├── Enums/
-│   ├── DTOs/
-│   ├── Models/
-│   ├── Repositories/
-│   ├── Services/
-│   │   ├── Binance/
-│   │   ├── Trading/
-│   │   └── Notification/
-│   └── Http/Controllers/
+│   ├── Console/Commands/       # Commandes Artisan (bot:run, report:daily)
+│   ├── Contracts/              # Interfaces des services
+│   ├── DTOs/                   # Data Transfer Objects (immutables, readonly)
+│   ├── Enums/                  # Énumérations PHP 8.4
+│   ├── Events/                 # Événements applicatifs
+│   ├── Exceptions/             # Exceptions personnalisées par domaine
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   ├── Middleware/
+│   │   └── Requests/           # Form Requests (validation)
+│   ├── Jobs/                   # Jobs asynchrones (SQS)
+│   ├── Listeners/              # Listeners d'événements
+│   ├── Models/                 # Modèles DynamoDB
+│   ├── Providers/              # Service Providers
+│   ├── Repositories/           # Accès aux données DynamoDB
+│   └── Services/               # Logique métier
+│       ├── Binance/
+│       ├── Trading/
+│       │   ├── Indicators/     # RSI, MA calculators
+│       │   └── Strategies/     # Trading strategies
+│       └── Notification/
 ├── config/
-│   ├── bot.php
-│   └── services.php
+│   ├── bot.php                 # Configuration du bot de trading
+│   ├── dynamodb.php            # Configuration DynamoDB
+│   └── services.php            # Services externes (Binance, Telegram)
 ├── bootstrap/
 ├── database/
 ├── public/
@@ -39,12 +51,15 @@ trading-bot/
 ├── routes/
 ├── storage/
 ├── tests/
-├── terraform/         # Déjà existant
-├── .claude/           # Déjà existant
-├── serverless.yml     # Config Bref
+│   ├── Unit/                   # Tests unitaires (indicateurs, DTOs)
+│   └── Feature/                # Tests d'intégration (services, commandes)
+├── terraform/                  # Infrastructure AWS (déjà existant)
+├── .claude/                    # Documentation projet (déjà existant)
 ├── composer.json
 └── .env.example
 ```
+
+> **Note** : Le déploiement sur AWS Lambda est géré via **Terraform** (pas Serverless Framework). Les layers Bref sont configurés dans `terraform/modules/lambda/`.
 
 ## Instructions
 
@@ -89,104 +104,131 @@ composer require jaggedsoft/php-binance-api
 ### Étape 5 : Packages de développement
 
 ```bash
-composer require --dev phpunit/phpunit laravel/pint
+# PHPUnit et Mockery sont déjà inclus dans Laravel 12
+# Ajouter Pint pour le linting PSR-12
+composer require --dev laravel/pint
 ```
 
 ### Étape 6 : Créer la structure des dossiers
 
 ```bash
+# Structure de base selon laravel.md
 mkdir -p app/Console/Commands
-mkdir -p app/Enums
+mkdir -p app/Contracts
 mkdir -p app/DTOs
-mkdir -p app/Models
-mkdir -p app/Repositories
-mkdir -p app/Services/Binance
-mkdir -p app/Services/Trading
-mkdir -p app/Services/Notification
+mkdir -p app/Enums
+mkdir -p app/Events
+mkdir -p app/Exceptions
 mkdir -p app/Http/Controllers
 mkdir -p app/Http/Requests
+mkdir -p app/Jobs
+mkdir -p app/Listeners
+mkdir -p app/Models
+mkdir -p app/Providers
+mkdir -p app/Repositories
+
+# Services métier
+mkdir -p app/Services/Binance
+mkdir -p app/Services/Trading/Indicators
+mkdir -p app/Services/Trading/Strategies
+mkdir -p app/Services/Notification
+
+# Structure des tests
+mkdir -p tests/Unit/Services/Trading/Indicators
+mkdir -p tests/Unit/DTOs
+mkdir -p tests/Feature/Console
+mkdir -p tests/Feature/Services
 ```
 
-### Étape 7 : Configurer serverless.yml
+### Étape 7 : Créer les fichiers de configuration
 
-**Créer** : `serverless.yml`
+**Créer** : `config/bot.php`
 
-```yaml
-service: trading-bot
+```php
+<?php
 
-provider:
-  name: aws
-  region: eu-west-3
-  runtime: provided.al2
-  stage: ${opt:stage, 'dev'}
-  environment:
-    APP_ENV: ${self:provider.stage}
-    APP_DEBUG: ${self:custom.debug.${self:provider.stage}, 'false'}
-    LOG_CHANNEL: stderr
-    CACHE_DRIVER: array
-    SESSION_DRIVER: array
-    VIEW_COMPILED_PATH: /tmp/storage/framework/views
+declare(strict_types=1);
 
-plugins:
-  - ./vendor/bref/bref
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Bot Status
+    |--------------------------------------------------------------------------
+    */
+    'enabled' => env('BOT_ENABLED', false),
 
-custom:
-  debug:
-    dev: 'true'
-    staging: 'false'
-    prod: 'false'
+    /*
+    |--------------------------------------------------------------------------
+    | Trading Configuration
+    |--------------------------------------------------------------------------
+    */
+    'trading' => [
+        'symbol' => env('BOT_SYMBOL', 'BTCUSDT'),
+        'amount' => (float) env('BOT_AMOUNT', 100),
+        'strategy' => env('BOT_STRATEGY', 'rsi'),
+    ],
 
-functions:
-  # Bot Executor (scheduled every 5 minutes)
-  bot-executor:
-    handler: artisan
-    description: "Trading bot executor"
-    timeout: 30
-    memorySize: 512
-    layers:
-      - ${bref:layer.php-84}
-      - ${bref:layer.console}
-    events:
-      - schedule:
-          rate: rate(5 minutes)
-          enabled: false  # Activer manuellement
-          input:
-            command: "bot:run"
+    /*
+    |--------------------------------------------------------------------------
+    | RSI Strategy Configuration
+    |--------------------------------------------------------------------------
+    */
+    'rsi' => [
+        'period' => (int) env('BOT_RSI_PERIOD', 14),
+        'oversold' => (int) env('BOT_RSI_OVERSOLD', 30),
+        'overbought' => (int) env('BOT_RSI_OVERBOUGHT', 70),
+    ],
 
-  # Daily Report (scheduled daily at 8am UTC)
-  daily-report:
-    handler: artisan
-    description: "Daily report generator"
-    timeout: 60
-    memorySize: 512
-    layers:
-      - ${bref:layer.php-84}
-      - ${bref:layer.console}
-    events:
-      - schedule:
-          rate: cron(0 8 * * ? *)
-          enabled: false
-          input:
-            command: "report:daily"
+    /*
+    |--------------------------------------------------------------------------
+    | Moving Average Strategy Configuration
+    |--------------------------------------------------------------------------
+    */
+    'ma' => [
+        'short_period' => (int) env('BOT_MA_SHORT', 50),
+        'long_period' => (int) env('BOT_MA_LONG', 200),
+    ],
 
-  # Web Dashboard (API Gateway)
-  web:
-    handler: public/index.php
-    description: "Web dashboard"
-    timeout: 28
-    memorySize: 1024
-    layers:
-      - ${bref:layer.php-84-fpm}
-    events:
-      - httpApi: '*'
+    /*
+    |--------------------------------------------------------------------------
+    | Safety Limits
+    |--------------------------------------------------------------------------
+    */
+    'limits' => [
+        'max_trades_per_day' => (int) env('BOT_MAX_TRADES_DAY', 50),
+        'max_amount_per_trade' => (float) env('BOT_MAX_AMOUNT_TRADE', 1000),
+        'min_balance_usdt' => (float) env('BOT_MIN_BALANCE', 100),
+        'cooldown_minutes' => (int) env('BOT_COOLDOWN_MINUTES', 5),
+    ],
+];
+```
 
-package:
-  patterns:
-    - '!node_modules/**'
-    - '!terraform/**'
-    - '!tests/**'
-    - '!.git/**'
-    - '!.claude/**'
+**Créer** : `config/dynamodb.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | AWS DynamoDB Configuration
+    |--------------------------------------------------------------------------
+    */
+    'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Table Names
+    |--------------------------------------------------------------------------
+    */
+    'tables' => [
+        'trades' => env('DYNAMODB_TABLE_TRADES', 'trading-bot-dev-trades'),
+        'bot_config' => env('DYNAMODB_TABLE_BOT_CONFIG', 'trading-bot-dev-bot-config'),
+        'reports' => env('DYNAMODB_TABLE_REPORTS', 'trading-bot-dev-reports'),
+    ],
+];
 ```
 
 ### Étape 8 : Configurer .env.example
@@ -248,14 +290,54 @@ BOT_RSI_OVERBOUGHT=70
 # MA Settings
 BOT_MA_SHORT=50
 BOT_MA_LONG=200
+
+# Safety Limits
+BOT_MAX_TRADES_DAY=50
+BOT_MAX_AMOUNT_TRADE=1000
+BOT_MIN_BALANCE=100
+BOT_COOLDOWN_MINUTES=5
 ```
 
-### Étape 9 : Optimisations pour Lambda
+### Étape 9 : Configurer services.php pour Binance et Telegram
+
+**Modifier** : `config/services.php` (ajouter)
+
+```php
+    /*
+    |--------------------------------------------------------------------------
+    | Binance API Configuration
+    |--------------------------------------------------------------------------
+    */
+    'binance' => [
+        'api_key' => env('BINANCE_API_KEY'),
+        'api_secret' => env('BINANCE_API_SECRET'),
+        'testnet' => env('BINANCE_TESTNET', true),
+        'base_url' => env('BINANCE_TESTNET', true)
+            ? 'https://testnet.binance.vision'
+            : 'https://api.binance.com',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Bot Configuration
+    |--------------------------------------------------------------------------
+    */
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+        'enabled' => env('TELEGRAM_ENABLED', false),
+        'base_url' => 'https://api.telegram.org',
+    ],
+```
+
+### Étape 10 : Optimisations pour Lambda
 
 **Modifier** : `bootstrap/app.php`
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -267,11 +349,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
-        //
+    ->withMiddleware(function (Middleware $middleware): void {
+        // Middleware configuration
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        //
+    ->withExceptions(function (Exceptions $exceptions): void {
+        // Exception handling configuration
     })
     ->create();
 ```
@@ -291,19 +373,19 @@ return Application::configure(basePath: dirname(__DIR__))
 ],
 ```
 
-### Étape 10 : Configurer .gitignore
+### Étape 11 : Configurer .gitignore
 
 **Modifier** : `.gitignore` (ajouter)
 
 ```gitignore
-# Lambda
-.serverless/
+# Lambda / Bref
 .bref/
 
 # IDE
 .idea/
 .vscode/
 *.swp
+*.swo
 
 # Environment
 .env
@@ -314,6 +396,7 @@ return Application::configure(basePath: dirname(__DIR__))
 terraform/.terraform/
 terraform/*.tfstate*
 terraform/*.tfvars
+terraform/placeholder.zip
 
 # Vendor
 /vendor/
@@ -324,6 +407,28 @@ terraform/*.tfvars
 
 # Cache
 .phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+```
+
+### Étape 12 : Créer les fichiers .gitkeep pour les dossiers vides
+
+```bash
+# Créer des fichiers .gitkeep pour conserver les dossiers vides dans git
+touch app/Contracts/.gitkeep
+touch app/DTOs/.gitkeep
+touch app/Enums/.gitkeep
+touch app/Events/.gitkeep
+touch app/Exceptions/.gitkeep
+touch app/Jobs/.gitkeep
+touch app/Listeners/.gitkeep
+touch app/Repositories/.gitkeep
+touch app/Services/Binance/.gitkeep
+touch app/Services/Trading/Indicators/.gitkeep
+touch app/Services/Trading/Strategies/.gitkeep
+touch app/Services/Notification/.gitkeep
 ```
 
 ## Vérification
@@ -338,11 +443,16 @@ vendor/bin/bref --version
 # Lister les commandes disponibles
 php artisan list
 
+# Vérifier la configuration
+php artisan config:show app
+php artisan config:show bot
+php artisan config:show dynamodb
+
 # Tester le serveur local
 php artisan serve
 
-# Vérifier la configuration
-php artisan config:show app
+# Vérifier le linting
+vendor/bin/pint --test
 ```
 
 ## Composer.json final
@@ -388,7 +498,8 @@ php artisan config:show app
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "test": "php artisan test",
-        "lint": "vendor/bin/pint"
+        "lint": "vendor/bin/pint",
+        "lint:fix": "vendor/bin/pint --repair"
     },
     "config": {
         "optimize-autoloader": true,
@@ -401,22 +512,51 @@ php artisan config:show app
 }
 ```
 
+## Standards à Respecter (Référence: laravel.md)
+
+### Typage Strict PHP 8.4
+
+Tous les fichiers PHP doivent commencer par :
+
+```php
+<?php
+
+declare(strict_types=1);
+```
+
+### Classes Finales et Readonly
+
+- Utiliser `final` par défaut pour les classes
+- Utiliser `readonly` pour les propriétés immutables et DTOs
+- Utiliser les types union et intersection PHP 8.4
+
+### Injection de Dépendances
+
+- Coder contre des interfaces, pas des implémentations
+- Utiliser le constructor injection avec `private readonly`
+- Enregistrer les bindings dans `AppServiceProvider`
+
 ## Dépendances
 
-- **Prérequis** : Phase 1 complétée (infrastructure AWS)
+- **Prérequis** : Phase 1 complétée (infrastructure AWS via Terraform)
 - **Utilisé par** : Toutes les tâches de la Phase 2
 
 ## Checklist
 
-- [ ] Créer le projet Laravel 12
-- [ ] Installer Bref et bref/laravel-bridge
-- [ ] Installer aws/aws-sdk-php-laravel
-- [ ] Installer jaggedsoft/php-binance-api
-- [ ] Installer les packages de dev (phpunit, pint)
-- [ ] Créer la structure des dossiers (Enums, DTOs, Services, etc.)
-- [ ] Créer serverless.yml
-- [ ] Configurer .env.example
-- [ ] Optimiser la config pour Lambda (logging stderr)
-- [ ] Mettre à jour .gitignore
-- [ ] Vérifier avec `php artisan serve`
-- [ ] Commit initial du projet Laravel
+- [x] Créer le projet Laravel 12
+- [x] Installer Bref et bref/laravel-bridge
+- [x] Installer aws/aws-sdk-php-laravel
+- [x] Installer jaggedsoft/php-binance-api
+- [x] Installer les packages de dev (pint)
+- [x] Créer la structure des dossiers complète
+- [x] Créer config/bot.php
+- [x] Créer config/dynamodb.php
+- [x] Configurer config/services.php (Binance, Telegram)
+- [x] Configurer .env.example
+- [x] Ajouter declare(strict_types=1) dans bootstrap/app.php
+- [x] Optimiser la config pour Lambda (logging stderr)
+- [x] Mettre à jour .gitignore
+- [x] Créer les fichiers .gitkeep
+- [x] Vérifier avec `php artisan serve`
+- [x] Vérifier avec `vendor/bin/pint --test`
+- [x] Commit initial du projet Laravel
