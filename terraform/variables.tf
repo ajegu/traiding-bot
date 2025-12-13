@@ -59,3 +59,18 @@ variable "alert_email" {
   type        = string
   default     = ""
 }
+
+# =============================================================================
+# EventBridge Rules
+# =============================================================================
+variable "eventbridge_bot_enabled" {
+  description = "Activer la règle EventBridge pour le bot (désactivé par défaut)"
+  type        = bool
+  default     = false
+}
+
+variable "eventbridge_report_enabled" {
+  description = "Activer la règle EventBridge pour le rapport quotidien (désactivé par défaut)"
+  type        = bool
+  default     = false
+}

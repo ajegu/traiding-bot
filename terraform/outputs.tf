@@ -94,3 +94,26 @@ output "sqs_notifications_queue_arn" {
   description = "ARN de la queue SQS notifications"
   value       = module.sqs.notifications_queue_arn
 }
+
+# =============================================================================
+# EventBridge Rules Outputs
+# =============================================================================
+output "eventbridge_bot_executor_rule_arn" {
+  description = "ARN de la règle EventBridge bot executor"
+  value       = module.eventbridge.bot_executor_rule_arn
+}
+
+output "eventbridge_bot_executor_rule_name" {
+  description = "Nom de la règle EventBridge bot executor"
+  value       = module.eventbridge.bot_executor_rule_name
+}
+
+output "eventbridge_daily_report_rule_arn" {
+  description = "ARN de la règle EventBridge daily report"
+  value       = module.eventbridge.daily_report_rule_arn
+}
+
+output "eventbridge_daily_report_rule_name" {
+  description = "Nom de la règle EventBridge daily report"
+  value       = module.eventbridge.daily_report_rule_name
+}
