@@ -19,7 +19,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 - [x] **1.4** SNS Topics (trade-alerts, error-alerts)
 - [x] **1.5** SQS Queues + DLQ (orders, notifications)
 - [x] **1.6** EventBridge Rules (cron 5min bot, cron daily report)
-- [ ] **1.7** IAM Roles et Policies (Lambda execution)
+- [x] **1.7** IAM Roles et Policies (Lambda execution)
 - [ ] **1.8** Lambda Functions (Bref PHP runtime)
 
 ---
@@ -78,12 +78,12 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 
 | Phase | Progression | Statut |
 |-------|-------------|--------|
-| 1. Infrastructure AWS | 6/8 | En cours |
+| 1. Infrastructure AWS | 7/8 | En cours |
 | 2. Application Laravel | 0/13 | Non commencé |
 | 3. Dashboard Web | 0/9 | Non commencé |
 | 4. CI/CD | 0/4 | Non commencé |
 | 5. Tests & Docs | 0/4 | Non commencé |
-| **Total** | **6/38** | **16%** |
+| **Total** | **7/38** | **18%** |
 
 ---
 

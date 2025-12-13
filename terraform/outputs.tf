@@ -117,3 +117,16 @@ output "eventbridge_daily_report_rule_name" {
   description = "Nom de la règle EventBridge daily report"
   value       = module.eventbridge.daily_report_rule_name
 }
+
+# =============================================================================
+# IAM Outputs
+# =============================================================================
+output "lambda_execution_role_arn" {
+  description = "ARN du rôle d'exécution Lambda"
+  value       = module.iam.lambda_exec_role_arn
+}
+
+output "lambda_execution_role_name" {
+  description = "Nom du rôle d'exécution Lambda"
+  value       = module.iam.lambda_exec_role_name
+}

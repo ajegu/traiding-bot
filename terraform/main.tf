@@ -76,3 +76,22 @@ module "eventbridge" {
   bot_executor_enabled = var.eventbridge_bot_enabled
   daily_report_enabled = var.eventbridge_report_enabled
 }
+
+# =============================================================================
+# IAM Roles & Policies
+# =============================================================================
+module "iam" {
+  source = "./modules/iam"
+
+  environment    = var.environment
+  project_name   = var.project_name
+  common_tags    = local.common_tags
+  aws_region     = data.aws_region.current.name
+  aws_account_id = data.aws_caller_identity.current.account_id
+
+  dynamodb_table_arns = module.dynamodb.all_table_arns
+  sns_topic_arns      = module.sns.topic_arns
+  sqs_queue_arns      = module.sqs.all_queue_arns
+
+  depends_on = [module.dynamodb, module.sns, module.sqs]
+}
