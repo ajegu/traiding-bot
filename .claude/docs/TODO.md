@@ -26,7 +26,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 
 ## Phase 2 : Application Laravel (Backend)
 
-- [ ] **2.1** Setup Laravel + Bref + packages AWS
+- [X] **2.1** Setup Laravel + Bref + packages AWS
 - [ ] **2.2** Configuration (config/bot.php, config/services.php)
 - [ ] **2.3** Enums (OrderSide, OrderType, OrderStatus, Strategy)
 - [ ] **2.4** DTOs (TradeResult, TradeStats, DailyReport)
