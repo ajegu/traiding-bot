@@ -29,7 +29,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 - [x] **2.1** Setup Laravel + Bref + packages AWS
 - [x] **2.2** Configuration (config/bot.php, config/services.php)
 - [x] **2.3** Enums (OrderSide, OrderType, OrderStatus, Strategy)
-- [ ] **2.4** DTOs (TradeResult, TradeStats, DailyReport)
+- [x] **2.4** DTOs (TradeResult, TradeStats, DailyReport)
 - [ ] **2.5** Models/Repositories DynamoDB (Trade, BotConfig, Report)
 - [ ] **2.6** BinanceService (prix, soldes, ordres market/limit)
 - [ ] **2.7** Indicateurs techniques (RSI, MA50, MA200)
@@ -79,11 +79,11 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 | Phase | Progression | Statut |
 |-------|-------------|--------|
 | 1. Infrastructure AWS | 8/8 | ✅ Terminé |
-| 2. Application Laravel | 3/13 | 🔄 En cours |
+| 2. Application Laravel | 4/13 | 🔄 En cours |
 | 3. Dashboard Web | 0/9 | Non commencé |
 | 4. CI/CD | 0/4 | Non commencé |
 | 5. Tests & Docs | 0/4 | Non commencé |
-| **Total** | **11/38** | **29%** |
+| **Total** | **12/38** | **32%** |
 
 ---
 
