@@ -11,7 +11,28 @@ final readonly class IndicatorsDTO
         public ?float $ma50 = null,
         public ?float $ma200 = null,
         public ?float $currentPrice = null,
+        public ?string $rsiSignal = null,
+        public ?string $trend = null,
+        public bool $goldenCross = false,
+        public bool $deathCross = false,
     ) {}
+
+    /**
+     * Crée une instance depuis un tableau.
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            rsi: $data['rsi'] ?? null,
+            ma50: $data['ma50'] ?? null,
+            ma200: $data['ma200'] ?? null,
+            currentPrice: $data['current_price'] ?? null,
+            rsiSignal: $data['rsi_signal'] ?? null,
+            trend: $data['trend'] ?? null,
+            goldenCross: $data['golden_cross'] ?? false,
+            deathCross: $data['death_cross'] ?? false,
+        );
+    }
 
     /**
      * Vérifie si le RSI indique une survente.
@@ -79,7 +100,11 @@ final readonly class IndicatorsDTO
             'ma50' => $this->ma50 !== null ? round($this->ma50, 2) : null,
             'ma200' => $this->ma200 !== null ? round($this->ma200, 2) : null,
             'current_price' => $this->currentPrice,
-        ], fn ($value) => $value !== null);
+            'rsi_signal' => $this->rsiSignal,
+            'trend' => $this->trend,
+            'golden_cross' => $this->goldenCross,
+            'death_cross' => $this->deathCross,
+        ], fn ($value) => $value !== null && $value !== false);
     }
 
     /**
@@ -92,6 +117,10 @@ final readonly class IndicatorsDTO
             ma50: $this->ma50,
             ma200: $this->ma200,
             currentPrice: $this->currentPrice,
+            rsiSignal: $this->rsiSignal,
+            trend: $this->trend,
+            goldenCross: $this->goldenCross,
+            deathCross: $this->deathCross,
         );
     }
 
@@ -105,6 +134,10 @@ final readonly class IndicatorsDTO
             ma50: $ma50,
             ma200: $ma200,
             currentPrice: $this->currentPrice,
+            rsiSignal: $this->rsiSignal,
+            trend: $this->trend,
+            goldenCross: $this->goldenCross,
+            deathCross: $this->deathCross,
         );
     }
 
@@ -118,6 +151,10 @@ final readonly class IndicatorsDTO
             ma50: $this->ma50,
             ma200: $this->ma200,
             currentPrice: $price,
+            rsiSignal: $this->rsiSignal,
+            trend: $this->trend,
+            goldenCross: $this->goldenCross,
+            deathCross: $this->deathCross,
         );
     }
 }
