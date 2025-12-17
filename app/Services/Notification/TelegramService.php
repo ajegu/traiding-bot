@@ -182,6 +182,126 @@ final class TelegramService
     }
 
     /**
+     * Envoie une photo avec légende optionnelle.
+     *
+     * @param  string  $photoPath  Chemin local vers l'image
+     * @param  string|null  $caption  Légende optionnelle (max 1024 caractères)
+     * @param  string|null  $parseMode  Format de la légende
+     */
+    public function sendPhoto(string $photoPath, ?string $caption = null, ?string $parseMode = 'MarkdownV2'): bool
+    {
+        if (! $this->enabled) {
+            Log::info('Telegram notifications disabled, skipping photo');
+
+            return false;
+        }
+
+        if (! file_exists($photoPath)) {
+            Log::error('Photo file not found', ['path' => $photoPath]);
+
+            return false;
+        }
+
+        return $this->executeWithRetry(function () use ($photoPath, $caption, $parseMode) {
+            $params = [
+                'chat_id' => $this->chatId,
+            ];
+
+            if ($caption !== null) {
+                $params['caption'] = $caption;
+                $params['parse_mode'] = $parseMode;
+            }
+
+            $response = Http::attach(
+                'photo',
+                file_get_contents($photoPath),
+                basename($photoPath)
+            )->post($this->getApiUrl('sendPhoto'), $params);
+
+            if (! $response->successful()) {
+                Log::error('Telegram sendPhoto API error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                throw new \RuntimeException("Telegram API error: {$response->status()}");
+            }
+
+            Log::info('Telegram photo sent', [
+                'message_id' => $response->json('result.message_id'),
+                'photo_path' => $photoPath,
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Envoie un document (PDF, CSV, etc.).
+     *
+     * @param  string  $documentPath  Chemin local vers le document
+     * @param  string|null  $caption  Légende optionnelle
+     * @param  string|null  $parseMode  Format de la légende
+     */
+    public function sendDocument(string $documentPath, ?string $caption = null, ?string $parseMode = 'MarkdownV2'): bool
+    {
+        if (! $this->enabled) {
+            Log::info('Telegram notifications disabled, skipping document');
+
+            return false;
+        }
+
+        if (! file_exists($documentPath)) {
+            Log::error('Document file not found', ['path' => $documentPath]);
+
+            return false;
+        }
+
+        $fileSize = filesize($documentPath);
+        if ($fileSize > 50 * 1024 * 1024) { // 50 MB limit
+            Log::error('Document file too large', [
+                'path' => $documentPath,
+                'size_mb' => $fileSize / (1024 * 1024),
+            ]);
+
+            return false;
+        }
+
+        return $this->executeWithRetry(function () use ($documentPath, $caption, $parseMode) {
+            $params = [
+                'chat_id' => $this->chatId,
+            ];
+
+            if ($caption !== null) {
+                $params['caption'] = $caption;
+                $params['parse_mode'] = $parseMode;
+            }
+
+            $response = Http::attach(
+                'document',
+                file_get_contents($documentPath),
+                basename($documentPath)
+            )->post($this->getApiUrl('sendDocument'), $params);
+
+            if (! $response->successful()) {
+                Log::error('Telegram sendDocument API error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                throw new \RuntimeException("Telegram API error: {$response->status()}");
+            }
+
+            Log::info('Telegram document sent', [
+                'message_id' => $response->json('result.message_id'),
+                'document_path' => $documentPath,
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
      * Échappe les caractères spéciaux pour MarkdownV2.
      *
      * Caractères à échapper : _ * [ ] ( ) ~ ` > # + - = | { } . !
@@ -195,6 +315,16 @@ final class TelegramService
         }
 
         return $text;
+    }
+
+    /**
+     * Échappe les caractères spéciaux pour HTML.
+     *
+     * Caractères à échapper : < > &
+     */
+    public function escapeHTML(string $text): string
+    {
+        return htmlspecialchars($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**
