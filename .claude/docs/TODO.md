@@ -30,12 +30,12 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 - [x] **2.2** Configuration (config/bot.php, config/services.php)
 - [x] **2.3** Enums (OrderSide, OrderType, OrderStatus, Strategy)
 - [x] **2.4** DTOs (TradeResult, TradeStats, DailyReport)
-- [ ] **2.5** Models/Repositories DynamoDB (Trade, BotConfig, Report)
-- [ ] **2.6** BinanceService (prix, soldes, ordres market/limit)
-- [ ] **2.7** Indicateurs techniques (RSI, MA50, MA200)
-- [ ] **2.8** TradingStrategy (analyse signaux, exécution trades)
-- [ ] **2.9** NotificationService (SNS publish, Telegram send)
-- [ ] **2.10** TelegramService (formatage MarkdownV2, sendMessage)
+- [x] **2.5** Models/Repositories DynamoDB (Trade, BotConfig, Report)
+- [x] **2.6** BinanceService (prix, soldes, ordres market/limit)
+- [x] **2.7** Indicateurs techniques (RSI, MA50, MA200)
+- [x] **2.8** TradingStrategy (analyse signaux, exécution trades)
+- [x] **2.9** NotificationService (SNS publish, Telegram send)
+- [x] **2.10** TelegramService (formatage MarkdownV2, sendMessage)
 - [ ] **2.11** ReportService (calcul P&L, génération rapport)
 - [ ] **2.12** Commande bot:run (exécution stratégie)
 - [ ] **2.13** Commande report:daily (rapport quotidien)
@@ -79,11 +79,11 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 | Phase | Progression | Statut |
 |-------|-------------|--------|
 | 1. Infrastructure AWS | 8/8 | ✅ Terminé |
-| 2. Application Laravel | 4/13 | 🔄 En cours |
+| 2. Application Laravel | 10/13 | 🔄 En cours |
 | 3. Dashboard Web | 0/9 | Non commencé |
 | 4. CI/CD | 0/4 | Non commencé |
 | 5. Tests & Docs | 0/4 | Non commencé |
-| **Total** | **12/38** | **32%** |
+| **Total** | **18/38** | **47%** |
 
 ---
 
