@@ -37,7 +37,7 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 - [x] **2.9** NotificationService (SNS publish, Telegram send)
 - [x] **2.10** TelegramService (formatage MarkdownV2, sendMessage)
 - [x] **2.11** ReportService (calcul P&L, génération rapport)
-- [ ] **2.12** Commande bot:run (exécution stratégie)
+- [x] **2.12** Commande bot:run (exécution stratégie)
 - [ ] **2.13** Commande report:daily (rapport quotidien)
 
 ---
@@ -79,11 +79,11 @@ Ce fichier permet de suivre l'avancement de l'implémentation du projet.
 | Phase | Progression | Statut |
 |-------|-------------|--------|
 | 1. Infrastructure AWS | 8/8 | ✅ Terminé |
-| 2. Application Laravel | 11/13 | 🔄 En cours |
+| 2. Application Laravel | 12/13 | 🔄 En cours |
 | 3. Dashboard Web | 0/9 | Non commencé |
 | 4. CI/CD | 0/4 | Non commencé |
 | 5. Tests & Docs | 0/4 | Non commencé |
-| **Total** | **19/38** | **50%** |
+| **Total** | **20/38** | **53%** |
 
 ---
 
