@@ -31,8 +31,7 @@ final class RunBot extends Command
         {--force : Run even if bot is disabled}
         {--symbol= : Trading pair symbol (default: from config)}
         {--strategy= : Trading strategy (rsi, ma, combined)}
-        {--amount= : Trade amount in USDT}
-        {--v|verbose : Verbose output}';
+        {--amount= : Trade amount in USDT}';
 
     /**
      * The console command description.
@@ -95,7 +94,8 @@ final class RunBot extends Command
             $config = $this->botConfigRepository->get();
 
             $symbol = $symbol ?? $config->symbol ?? config('bot.trading.symbol');
-            $strategy = $strategyOption ? Strategy::from($strategyOption) : ($config->strategy ?? Strategy::from(config('bot.trading.strategy')));
+            $strategyString = $strategyOption ?? $config->strategy ?? config('bot.trading.strategy');
+            $strategy = Strategy::from($strategyString);
             $amount = $amount ? (float) $amount : ($config->amount ?? config('bot.trading.amount'));
 
             $this->line('');

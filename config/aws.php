@@ -17,10 +17,25 @@ return [
     |
     */
 
-    'credentials' => [
+    /*
+    |--------------------------------------------------------------------------
+    | AWS Credentials
+    |--------------------------------------------------------------------------
+    |
+    | If AWS_PROFILE is set, the SDK will use the profile from ~/.aws/config.
+    | Otherwise, it will use the explicit credentials if provided.
+    | If neither is set, it falls back to the default credential provider chain
+    | (environment variables, instance profile, etc.).
+    |
+    */
+
+    'profile' => env('AWS_PROFILE'),
+
+    'credentials' => env('AWS_ACCESS_KEY_ID') && env('AWS_SECRET_ACCESS_KEY') ? array_filter([
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
-    ],
+        'token' => env('AWS_SESSION_TOKEN'),
+    ]) : null,
 
     'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
     'version' => 'latest',

@@ -29,17 +29,25 @@ final class BinanceClient
     public function getPrice(string $symbol): float
     {
         try {
-            $ticker = $this->api->price($symbol);
+            $price = $this->api->price($symbol);
 
-            if (! isset($ticker[$symbol])) {
-                throw new BinanceApiException(
-                    "Price not found for symbol: {$symbol}",
-                    404,
-                    ['symbol' => $symbol]
-                );
+            // La lib retourne directement une string quand on passe un symbole spécifique
+            if (is_string($price)) {
+                return (float) $price;
             }
 
-            return (float) $ticker[$symbol];
+            // Si on passe null, elle retourne un array de tous les prix
+            if (is_array($price) && isset($price[$symbol])) {
+                return (float) $price[$symbol];
+            }
+
+            throw new BinanceApiException(
+                "Price not found for symbol: {$symbol}",
+                404,
+                ['symbol' => $symbol]
+            );
+        } catch (BinanceApiException $e) {
+            throw $e;
         } catch (\Exception $e) {
             $this->handleException($e, __METHOD__);
             throw $e;

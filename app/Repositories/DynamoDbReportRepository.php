@@ -13,15 +13,12 @@ use Illuminate\Support\Facades\Log;
 
 final class DynamoDbReportRepository implements ReportRepositoryInterface
 {
-    private const TABLE_NAME_PREFIX = 'trading-bot';
-
     private string $tableName;
 
     public function __construct(
         private readonly DynamoDbClient $dynamoDb,
     ) {
-        $environment = config('app.env', 'dev');
-        $this->tableName = self::TABLE_NAME_PREFIX."-{$environment}-reports";
+        $this->tableName = (string) config('services.dynamodb.tables.reports', 'trading-bot-dev-reports');
     }
 
     /**

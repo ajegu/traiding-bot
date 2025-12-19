@@ -14,15 +14,16 @@ use Illuminate\Support\Facades\Log;
 
 final class DynamoDbTradeRepository implements TradeRepositoryInterface
 {
-    private const TABLE_NAME_PREFIX = 'trading-bot';
+    private const GSI_SYMBOL_DATE = 'gsi1-symbol-date';
+    private const GSI_DATE = 'gsi2-date';
+    private const GSI_STATUS = 'gsi3-status';
 
     private string $tableName;
 
     public function __construct(
         private readonly DynamoDbClient $dynamoDb,
     ) {
-        $environment = config('app.env', 'dev');
-        $this->tableName = self::TABLE_NAME_PREFIX."-{$environment}-trades";
+        $this->tableName = (string) config('services.dynamodb.tables.trades', 'trading-bot-dev-trades');
     }
 
     /**
@@ -118,7 +119,7 @@ final class DynamoDbTradeRepository implements TradeRepositoryInterface
         try {
             $result = $this->dynamoDb->query([
                 'TableName' => $this->tableName,
-                'IndexName' => 'gsi2-date-index',
+                'IndexName' => self::GSI_DATE,
                 'KeyConditionExpression' => 'gsi2pk = :date',
                 'ExpressionAttributeValues' => [
                     ':date' => ['S' => 'DATE#'.$date->format('Y-m-d')],
@@ -140,22 +141,25 @@ final class DynamoDbTradeRepository implements TradeRepositoryInterface
 
     /**
      * Récupère les trades d'une période.
+     *
+     * Note: Itère sur chaque jour car le GSI utilise la date comme partition key.
      */
     public function findByDateRange(Carbon $from, Carbon $to): Collection
     {
         try {
-            $result = $this->dynamoDb->query([
-                'TableName' => $this->tableName,
-                'IndexName' => 'gsi2-date-index',
-                'KeyConditionExpression' => 'gsi2pk BETWEEN :from AND :to',
-                'ExpressionAttributeValues' => [
-                    ':from' => ['S' => 'DATE#'.$from->format('Y-m-d')],
-                    ':to' => ['S' => 'DATE#'.$to->format('Y-m-d')],
-                ],
-                'ScanIndexForward' => false,
-            ]);
+            $allTrades = collect();
+            $currentDate = $from->copy()->startOfDay();
+            $endDate = $to->copy()->startOfDay();
 
-            return $this->mapResultsToCollection($result['Items'] ?? []);
+            // Itérer sur chaque jour de la période
+            while ($currentDate->lte($endDate)) {
+                $dayTrades = $this->findByDate($currentDate, 1000);
+                $allTrades = $allTrades->merge($dayTrades);
+                $currentDate->addDay();
+            }
+
+            // Trier par date décroissante
+            return $allTrades->sortByDesc(fn (Trade $trade) => $trade->createdAt);
         } catch (\Exception $e) {
             Log::error('Failed to find trades by date range', [
                 'error' => $e->getMessage(),
@@ -175,7 +179,7 @@ final class DynamoDbTradeRepository implements TradeRepositoryInterface
         try {
             $result = $this->dynamoDb->query([
                 'TableName' => $this->tableName,
-                'IndexName' => 'gsi1-symbol-date-index',
+                'IndexName' => self::GSI_SYMBOL_DATE,
                 'KeyConditionExpression' => 'gsi1pk = :symbol',
                 'ExpressionAttributeValues' => [
                     ':symbol' => ['S' => "SYMBOL#{$symbol}"],
@@ -203,7 +207,7 @@ final class DynamoDbTradeRepository implements TradeRepositoryInterface
         try {
             $result = $this->dynamoDb->query([
                 'TableName' => $this->tableName,
-                'IndexName' => 'gsi3-status-index',
+                'IndexName' => self::GSI_STATUS,
                 'KeyConditionExpression' => 'gsi3pk = :status',
                 'ExpressionAttributeValues' => [
                     ':status' => ['S' => "STATUS#{$status}"],
@@ -230,7 +234,7 @@ final class DynamoDbTradeRepository implements TradeRepositoryInterface
         try {
             $params = [
                 'TableName' => $this->tableName,
-                'IndexName' => 'gsi3-status-index',
+                'IndexName' => self::GSI_STATUS,
                 'KeyConditionExpression' => 'gsi3pk = :status',
                 'FilterExpression' => 'side = :side AND attribute_not_exists(related_trade_id)',
                 'ExpressionAttributeValues' => [
@@ -265,7 +269,7 @@ final class DynamoDbTradeRepository implements TradeRepositoryInterface
         try {
             $result = $this->dynamoDb->query([
                 'TableName' => $this->tableName,
-                'IndexName' => 'gsi2-date-index',
+                'IndexName' => self::GSI_DATE,
                 'KeyConditionExpression' => 'gsi2pk = :date',
                 'ExpressionAttributeValues' => [
                     ':date' => ['S' => 'DATE#'.$date->format('Y-m-d')],

@@ -211,6 +211,54 @@ alias aws-login='aws sso login --sso-session trading-bot'
 alias aws-logout='aws sso logout'
 ```
 
+### Pour Laravel/PHP (Commandes Artisan)
+
+Le SDK AWS PHP ne supporte pas nativement les tokens SSO comme la CLI. Il faut exporter les credentials temporaires :
+
+```bash
+# Méthode 1 : Exporter les credentials et exécuter la commande (une seule ligne)
+eval "$(aws configure export-credentials --profile tb-dev --format env)" && php artisan bot:run
+
+# Méthode 2 : Créer un alias pratique (ajouter dans ~/.zshrc ou ~/.bashrc)
+alias artisan-aws='eval "$(aws configure export-credentials --profile tb-dev --format env)" && php artisan'
+
+# Utilisation de l'alias
+artisan-aws bot:run --dry-run
+artisan-aws report:daily --dry-run
+```
+
+**Explication** :
+- `aws configure export-credentials` exporte les credentials temporaires SSO
+- Les variables exportées incluent : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+- Ces credentials sont valides pendant la durée de la session SSO (1-12h)
+
+**Alias recommandés** (à ajouter dans `~/.zshrc`) :
+
+```bash
+# Exécuter une commande artisan avec les credentials AWS SSO
+artisan-aws() {
+    eval "$(aws configure export-credentials --profile tb-dev --format env)" && php artisan "$@"
+}
+
+# Raccourcis pour les commandes fréquentes
+alias bot-run='artisan-aws bot:run'
+alias bot-dry='artisan-aws bot:run --dry-run'
+alias report-daily='artisan-aws report:daily'
+alias report-dry='artisan-aws report:daily --dry-run'
+```
+
+**Vérifier que les credentials fonctionnent** :
+
+```bash
+# Tester l'accès AWS depuis PHP
+eval "$(aws configure export-credentials --profile tb-dev --format env)" && php -r "
+require 'vendor/autoload.php';
+\$sdk = new Aws\Sdk(['region' => 'eu-west-3', 'version' => 'latest']);
+\$sts = \$sdk->createSts();
+print_r(\$sts->getCallerIdentity()->toArray());
+"
+```
+
 ### Pour Terraform
 
 ```bash

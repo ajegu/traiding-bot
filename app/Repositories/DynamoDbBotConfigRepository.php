@@ -12,15 +12,12 @@ use Illuminate\Support\Facades\Log;
 
 final class DynamoDbBotConfigRepository implements BotConfigRepositoryInterface
 {
-    private const TABLE_NAME_PREFIX = 'trading-bot';
-
     private string $tableName;
 
     public function __construct(
         private readonly DynamoDbClient $dynamoDb,
     ) {
-        $environment = config('app.env', 'dev');
-        $this->tableName = self::TABLE_NAME_PREFIX."-{$environment}-bot-config";
+        $this->tableName = (string) config('services.dynamodb.tables.bot_config', 'trading-bot-dev-bot-config');
     }
 
     /**

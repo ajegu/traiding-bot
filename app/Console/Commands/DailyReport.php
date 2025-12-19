@@ -27,8 +27,7 @@ final class DailyReport extends Command
     protected $signature = 'report:daily
         {--date= : Date for the report (YYYY-MM-DD, default: yesterday)}
         {--dry-run : Generate report without sending to Telegram}
-        {--chat-id= : Override Telegram chat ID}
-        {--v|verbose : Verbose output}';
+        {--chat-id= : Override Telegram chat ID}';
 
     /**
      * The console command description.
