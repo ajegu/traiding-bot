@@ -11,7 +11,7 @@ interface BotConfigRepositoryInterface
     /**
      * Récupère la configuration du bot.
      */
-    public function get(): ?BotConfig;
+    public function get(): BotConfig;
 
     /**
      * Sauvegarde la configuration du bot.

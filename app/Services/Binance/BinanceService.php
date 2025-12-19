@@ -92,9 +92,8 @@ final class BinanceService implements BinanceServiceInterface
         );
 
         return array_map(
-            fn (array $kline, int|string $timestamp) => KlineDTO::fromBinanceResponse($kline, $timestamp),
-            $klines,
-            array_keys($klines)
+            fn (array $kline) => KlineDTO::fromBinanceResponse($kline),
+            $klines
         );
     }
 
@@ -378,12 +377,14 @@ final class BinanceService implements BinanceServiceInterface
     {
         $balance = $this->getBalance($asset);
 
-        if ($balance === null || $balance->free < $required) {
+        $availableBalance = $balance !== null ? $balance->free : 0.0;
+
+        if ($availableBalance < $required) {
             throw new InsufficientBalanceException(
                 message: "Insufficient {$asset} balance",
                 asset: $asset,
                 required: $required,
-                available: $balance?->free ?? 0.0
+                available: $availableBalance
             );
         }
     }

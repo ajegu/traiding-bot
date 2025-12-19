@@ -1,0 +1,26 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+
+    level: 5
+
+    excludePaths:
+        - app/Http/Middleware (?)
+        # Exclude commands that require AWS/Binance services during bootstrap
+        - app/Console/Commands/RunBot.php
+        - app/Console/Commands/DailyReport.php
+
+    # Ignore errors for Binance API library (external library with dynamic methods)
+    ignoreErrors:
+        # Binance API library uses dynamic methods not visible to PHPStan
+        - '#Call to an undefined method Binance\\API::ticker24hr\(\)#'
+        - '#Call to an undefined method Binance\\API::marketBuyQuote\(\)#'
+        - '#Call to an undefined method Binance\\API::ping\(\)#'
+        # Binance API orderStatus and cancel accept int or string
+        - '#Parameter \#2 \$orderid of method Binance\\API::orderStatus\(\) expects string\|null, int given#'
+        - '#Parameter \#2 \$orderid of method Binance\\API::cancel\(\) expects string\|null, int given#'
+
+    reportUnmatchedIgnoredErrors: false

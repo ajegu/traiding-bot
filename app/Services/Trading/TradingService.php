@@ -16,12 +16,13 @@ use App\Services\Trading\Indicators\IndicatorService;
 use App\Services\Trading\Strategies\CombinedStrategy;
 use App\Services\Trading\Strategies\MovingAverageStrategy;
 use App\Services\Trading\Strategies\RsiStrategy;
+use App\Contracts\TradingServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Service principal de trading qui orchestre l'analyse et l'exécution des trades.
  */
-final class TradingService
+final class TradingService implements TradingServiceInterface
 {
     public function __construct(
         private readonly BinanceServiceInterface $binanceService,
@@ -195,17 +196,19 @@ final class TradingService
         // Récupérer le solde disponible
         $balance = $this->binanceService->getBalance($baseAsset);
 
-        if ($balance === null || $balance->free <= 0) {
+        $availableBalance = $balance !== null ? $balance->free : 0.0;
+
+        if ($availableBalance <= 0) {
             throw new InsufficientBalanceException(
                 message: "No {$baseAsset} available to sell",
                 asset: $baseAsset,
                 required: 0,
-                available: $balance?->free ?? 0
+                available: $availableBalance
             );
         }
 
         // Vendre tout le solde disponible
-        return $this->binanceService->marketSell($symbol, $balance->free);
+        return $this->binanceService->marketSell($symbol, $availableBalance);
     }
 
     /**

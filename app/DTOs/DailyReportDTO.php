@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\DTOs;
 
-use DateTimeImmutable;
+use Carbon\Carbon;
 
 final readonly class DailyReportDTO
 {
     /**
      * @param  array<TradeResultDTO>  $trades
-     * @param  array<BalanceDTO>  $balances
+     * @param  array<string, float>  $balances  Balances par asset (ex: ['BTC' => 0.5, 'USDT' => 1000])
      */
     public function __construct(
-        public DateTimeImmutable $date,
-        public TradeStatsDTO $stats,
-        public array $trades,
+        public Carbon $date,
+        public int $totalTrades,
+        public int $buyCount,
+        public int $sellCount,
+        public float $totalPnl,
+        public float $totalPnlPercent,
         public array $balances,
         public float $totalBalanceUsdt,
+        public array $trades = [],
         public ?float $previousDayBalanceUsdt = null,
     ) {}
 
@@ -51,7 +55,7 @@ final readonly class DailyReportDTO
      */
     public function isPositiveDay(): bool
     {
-        return $this->stats->totalPnl > 0;
+        return $this->totalPnl > 0;
     }
 
     /**
@@ -61,10 +65,14 @@ final readonly class DailyReportDTO
     {
         return [
             'date' => $this->date->format('Y-m-d'),
-            'stats' => $this->stats->toArray(),
-            'trades' => array_map(fn ($t) => $t->toArray(), $this->trades),
-            'balances' => array_map(fn ($b) => $b->toArray(), $this->balances),
+            'total_trades' => $this->totalTrades,
+            'buy_count' => $this->buyCount,
+            'sell_count' => $this->sellCount,
+            'total_pnl' => round($this->totalPnl, 2),
+            'total_pnl_percent' => round($this->totalPnlPercent, 2),
+            'balances' => $this->balances,
             'total_balance_usdt' => round($this->totalBalanceUsdt, 2),
+            'trades' => array_map(fn ($t) => $t->toArray(), $this->trades),
             'previous_day_balance_usdt' => $this->previousDayBalanceUsdt !== null
                 ? round($this->previousDayBalanceUsdt, 2)
                 : null,

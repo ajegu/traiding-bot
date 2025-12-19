@@ -125,34 +125,32 @@ final class RunBot extends Command
             $this->displayResult($result->signal, $result->reason);
 
             // 5. Afficher les indicateurs
-            if ($result->indicators !== null) {
-                $this->line('');
-                $this->info('📈 Technical Indicators:');
+            $this->line('');
+            $this->info('📈 Technical Indicators:');
 
-                if ($result->indicators->rsi !== null) {
-                    $rsiColor = $result->indicators->rsi < 30 ? 'green' : ($result->indicators->rsi > 70 ? 'red' : 'yellow');
-                    $this->line("  • RSI: <fg={$rsiColor}>{$result->indicators->rsi}</>");
-                }
+            if ($result->indicators->rsi !== null) {
+                $rsiColor = $result->indicators->rsi < 30 ? 'green' : ($result->indicators->rsi > 70 ? 'red' : 'yellow');
+                $this->line("  • RSI: <fg={$rsiColor}>{$result->indicators->rsi}</>");
+            }
 
-                if ($result->indicators->ma50 !== null) {
-                    $this->line("  • MA50: {$result->indicators->ma50}");
-                }
+            if ($result->indicators->ma50 !== null) {
+                $this->line("  • MA50: {$result->indicators->ma50}");
+            }
 
-                if ($result->indicators->ma200 !== null) {
-                    $this->line("  • MA200: {$result->indicators->ma200}");
-                }
+            if ($result->indicators->ma200 !== null) {
+                $this->line("  • MA200: {$result->indicators->ma200}");
+            }
 
-                if ($result->indicators->currentPrice !== null) {
-                    $this->line("  • Current Price: {$result->indicators->currentPrice} USDT");
-                }
+            if ($result->indicators->currentPrice !== null) {
+                $this->line("  • Current Price: {$result->indicators->currentPrice} USDT");
+            }
 
-                if ($result->indicators->goldenCross) {
-                    $this->line('  • <fg=green>Golden Cross detected!</>');
-                }
+            if ($result->indicators->goldenCross) {
+                $this->line('  • <fg=green>Golden Cross detected!</>');
+            }
 
-                if ($result->indicators->deathCross) {
-                    $this->line('  • <fg=red>Death Cross detected!</>');
-                }
+            if ($result->indicators->deathCross) {
+                $this->line('  • <fg=red>Death Cross detected!</>');
             }
 
             // 6. Afficher le trade si exécuté
@@ -166,10 +164,8 @@ final class RunBot extends Command
                 $this->line("  • Order ID: {$result->trade->orderId}");
 
                 // Notification
-                if ($result->trade !== null) {
-                    $this->line('');
-                    $this->info('📬 Sending notifications...');
-                }
+                $this->line('');
+                $this->info('📬 Sending notifications...');
             }
 
             // 7. Log de fin

@@ -26,7 +26,7 @@ final class DynamoDbBotConfigRepository implements BotConfigRepositoryInterface
     /**
      * Récupère la configuration du bot.
      */
-    public function get(): ?BotConfig
+    public function get(): BotConfig
     {
         try {
             $result = $this->dynamoDb->getItem([
@@ -122,7 +122,7 @@ final class DynamoDbBotConfigRepository implements BotConfigRepositoryInterface
     {
         $config = $this->get();
 
-        return $config?->enabled ?? false;
+        return $config->enabled;
     }
 
     /**
@@ -164,7 +164,7 @@ final class DynamoDbBotConfigRepository implements BotConfigRepositoryInterface
     {
         $config = $this->get();
 
-        return $config?->strategy ?? 'rsi';
+        return $config->strategy;
     }
 
     /**
@@ -207,6 +207,6 @@ final class DynamoDbBotConfigRepository implements BotConfigRepositoryInterface
     {
         $config = $this->get();
 
-        return $config?->lastExecution;
+        return $config->lastExecution;
     }
 }

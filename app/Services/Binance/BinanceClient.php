@@ -19,12 +19,8 @@ final class BinanceClient
         private readonly string $apiSecret,
         private readonly bool $testnet = true,
     ) {
-        $this->api = new \Binance\API($this->apiKey, $this->apiSecret);
-
-        if ($this->testnet) {
-            // Configuration pour testnet
-            $this->api->useTestnet();
-        }
+        // Le 3ème paramètre active le testnet directement dans le constructeur
+        $this->api = new \Binance\API($this->apiKey, $this->apiSecret, $this->testnet);
     }
 
     /**

@@ -140,7 +140,7 @@ final class TelegramService
                 $emoji = $trade->side === OrderSide::Buy ? '🟢' : '🔴';
                 $side = $trade->side === OrderSide::Buy ? 'BUY' : 'SELL';
                 $symbol = str_replace('USDT', '', $trade->symbol);
-                $time = $trade->createdAt->format('H:i');
+                $time = $trade->executedAt->format('H:i');
 
                 $message .= "{$emoji} {$side} ".number_format($trade->quantity, 8).' ';
                 $message .= $this->escapeMarkdownV2($symbol);
