@@ -23,13 +23,32 @@ final readonly class KlineDTO
     /**
      * Crée une instance depuis une réponse Binance.
      *
-     * Format Binance kline:
+     * La bibliothèque jaggedsoft/php-binance-api retourne un format associatif :
+     * [open, high, low, close, volume, openTime, closeTime, assetVolume, baseVolume, trades, ...]
+     *
+     * Format API brut Binance (non utilisé directement) :
      * [0] Open time, [1] Open, [2] High, [3] Low, [4] Close, [5] Volume,
      * [6] Close time, [7] Quote asset volume, [8] Number of trades,
      * [9] Taker buy base volume, [10] Taker buy quote volume, [11] Ignore
      */
     public static function fromBinanceResponse(array $kline): self
     {
+        // Format associatif de jaggedsoft/php-binance-api
+        if (isset($kline['open'])) {
+            return new self(
+                openTime: (new DateTimeImmutable)->setTimestamp((int) ($kline['openTime'] / 1000)),
+                open: (float) $kline['open'],
+                high: (float) $kline['high'],
+                low: (float) $kline['low'],
+                close: (float) $kline['close'],
+                volume: (float) $kline['volume'],
+                closeTime: (new DateTimeImmutable)->setTimestamp((int) ($kline['closeTime'] / 1000)),
+                quoteVolume: (float) ($kline['assetVolume'] ?? $kline['baseVolume'] ?? 0),
+                numberOfTrades: (int) ($kline['trades'] ?? 0),
+            );
+        }
+
+        // Format indexé numérique (API Binance brute)
         return new self(
             openTime: (new DateTimeImmutable)->setTimestamp((int) ($kline[0] / 1000)),
             open: (float) $kline[1],

@@ -140,11 +140,13 @@ final class TelegramService
                 $emoji = $trade->side === OrderSide::Buy ? '🟢' : '🔴';
                 $side = $trade->side === OrderSide::Buy ? 'BUY' : 'SELL';
                 $symbol = str_replace('USDT', '', $trade->symbol);
-                $time = $trade->executedAt->format('H:i');
+                $time = $this->escapeMarkdownV2($trade->executedAt->format('H:i'));
+                $quantity = $this->escapeMarkdownV2(number_format($trade->quantity, 8));
+                $price = $this->escapeMarkdownV2(number_format($trade->price, 2));
 
-                $message .= "{$emoji} {$side} ".number_format($trade->quantity, 8).' ';
+                $message .= "{$emoji} {$side} {$quantity} ";
                 $message .= $this->escapeMarkdownV2($symbol);
-                $message .= ' @ '.number_format($trade->price, 2)." USDT \\({$time}\\)\n";
+                $message .= " @ {$price} USDT \\({$time}\\)\n";
             }
         } else {
             $message .= "Aucun trade exécuté aujourd'hui\\.\n";
@@ -156,23 +158,41 @@ final class TelegramService
         $message .= "💰 *Performance*\n\n";
 
         $pnlEmoji = $report->totalPnl >= 0 ? '📈' : '📉';
-        $pnlSign = $report->totalPnl >= 0 ? '+' : '';
-        $message .= "• P&L : {$pnlEmoji} {$pnlSign}".number_format($report->totalPnl, 2).' USDT ';
-        $message .= '\\('.$pnlSign.number_format($report->totalPnlPercent, 2).'%\\)'."\n";
+        $pnlSign = $report->totalPnl >= 0 ? '\\+' : '\\-';
+        $pnlFormatted = $this->escapeMarkdownV2(number_format(abs($report->totalPnl), 2));
+        $pnlPercentFormatted = $this->escapeMarkdownV2(number_format(abs($report->totalPnlPercent), 2));
+        $message .= "• P&L : {$pnlEmoji} {$pnlSign}{$pnlFormatted} USDT ";
+        $message .= "\\({$pnlSign}{$pnlPercentFormatted}%\\)\n";
         $message .= "• Trades : {$report->totalTrades} \\({$report->buyCount} achats, {$report->sellCount} ventes\\)\n";
 
         $message .= "\n━━━━━━━━━━━━━━━━━━━━\n\n";
 
-        // Section Soldes
+        // Section Soldes (limiter aux 10 principaux pour éviter message trop long)
         $message .= "🏦 *Solde actuel*\n\n";
 
+        // Filtrer uniquement les principaux assets
+        $mainAssets = ['BTC', 'ETH', 'BNB', 'USDT', 'USDC', 'BUSD', 'SOL', 'XRP', 'ADA', 'DOGE'];
+        $displayedCount = 0;
+        $maxDisplay = 10;
+
         foreach ($report->balances as $asset => $balance) {
-            if ($balance > 0) {
-                $message .= "• ".$this->escapeMarkdownV2($asset).' : '.number_format($balance, 8)."\n";
+            if ($balance > 0 && (in_array((string) $asset, $mainAssets) || $displayedCount < $maxDisplay)) {
+                $balanceFormatted = $this->escapeMarkdownV2(number_format($balance, 8));
+                $message .= "• ".$this->escapeMarkdownV2($asset)." : {$balanceFormatted}\n";
+                $displayedCount++;
+                if ($displayedCount >= $maxDisplay) {
+                    break;
+                }
             }
         }
 
-        $message .= "\n💎 *Total* : ".number_format($report->totalBalanceUsdt, 2)." USDT\n";
+        if (count($report->balances) > $maxDisplay) {
+            $remaining = count($report->balances) - $maxDisplay;
+            $message .= "_\\.\\.\\. et {$remaining} autres assets_\n";
+        }
+
+        $totalFormatted = $this->escapeMarkdownV2(number_format($report->totalBalanceUsdt, 2));
+        $message .= "\n💎 *Total* : {$totalFormatted} USDT\n";
 
         $message .= "\n━━━━━━━━━━━━━━━━━━━━\n\n";
 
@@ -306,8 +326,9 @@ final class TelegramService
      *
      * Caractères à échapper : _ * [ ] ( ) ~ ` > # + - = | { } . !
      */
-    public function escapeMarkdownV2(string $text): string
+    public function escapeMarkdownV2(string|int|float $text): string
     {
+        $text = (string) $text;
         $specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
 
         foreach ($specialChars as $char) {

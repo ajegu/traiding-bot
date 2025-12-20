@@ -14,7 +14,8 @@
 | 3 | Query `BETWEEN` sur partition key (non supporté par DynamoDB) | `DynamoDbTradeRepository.php` | ✅ Corrigé |
 | 4 | Type mismatch Strategy enum vs string | `RunBot.php` | ✅ Corrigé |
 | 5 | `price()` retourne string, pas array | `BinanceClient.php` | ✅ Corrigé |
-| 6 | `Undefined array key 0` dans les indicateurs | À investiguer | ⏳ En cours |
+| 6 | `Undefined array key 0` dans les indicateurs | `KlineDTO.php` | ✅ Corrigé |
+| 7 | Timeout `report:daily` (trop d'appels API) | `ReportService.php` | ✅ Corrigé |
 
 ---
 
@@ -103,54 +104,50 @@ $strategy = Strategy::from($strategyString);
 
 ---
 
-## Erreur actuelle : `Undefined array key 0`
+### 6. Format de retour `getKlines()` (jaggedsoft/php-binance-api)
 
-### Contexte
-Se produit lors de l'analyse du marché (calcul des indicateurs techniques).
+**Problème** : `KlineDTO::fromBinanceResponse()` attendait un tableau indexé numériquement (`[0]`, `[1]`, etc.), mais la bibliothèque retourne un tableau associatif avec des clés nommées (`open`, `high`, `low`, `close`, etc.).
 
-### Cause probable
-La méthode `getKlines()` de `BinanceClient` retourne des données dans un format différent de celui attendu par les indicateurs.
+**Fichier** : `app/DTOs/KlineDTO.php`
 
-### Fichiers à vérifier
-- `app/Services/Binance/BinanceClient.php` - méthode `getKlines()`
-- `app/Services/Trading/Indicators/RsiIndicator.php`
-- `app/Services/Trading/Indicators/MovingAverageIndicator.php`
+**Avant** :
+```php
+public static function fromBinanceResponse(array $kline): self
+{
+    return new self(
+        openTime: (new DateTimeImmutable)->setTimestamp((int) ($kline[0] / 1000)),
+        open: (float) $kline[1],
+        // ...
+    );
+}
+```
+
+**Après** :
+```php
+public static function fromBinanceResponse(array $kline): self
+{
+    // Format associatif de jaggedsoft/php-binance-api
+    if (isset($kline['open'])) {
+        return new self(
+            openTime: (new DateTimeImmutable)->setTimestamp((int) ($kline['openTime'] / 1000)),
+            open: (float) $kline['open'],
+            // ...
+        );
+    }
+    // Fallback format indexé numérique (API Binance brute)
+    return new self(...);
+}
+```
 
 ---
 
-## Solutions de résolution
+### 7. Timeout `report:daily` (trop d'appels API)
 
-### Solution 1 : Débugger `getKlines()`
+**Problème** : `getPortfolioValue()` faisait un appel API par asset pour récupérer le prix. Sur testnet avec des centaines d'assets de test, le rapport prenait plusieurs minutes.
 
-```bash
-eval "$(aws configure export-credentials --profile tb-dev --format env)" && php -r "
-require 'vendor/autoload.php';
-\$api = new Binance\API('', '', true);
-\$klines = \$api->candlesticks('BTCUSDT', '5m', 10);
-echo 'Type: ' . gettype(\$klines) . PHP_EOL;
-echo 'Keys: ' . implode(', ', array_keys(\$klines)) . PHP_EOL;
-print_r(\$klines[array_key_first(\$klines)]);
-"
-```
+**Fichier** : `app/Services/Report/ReportService.php`
 
-### Solution 2 : Vérifier les clés API Binance Testnet
-
-Les clés actuelles peuvent être invalides ou pour le mauvais environnement.
-
-**Action** : Créer de nouvelles clés sur https://testnet.binance.vision/
-1. Se connecter avec GitHub
-2. Générer de nouvelles clés API
-3. Mettre à jour `.env` :
-   ```
-   BINANCE_API_KEY=nouvelle_cle
-   BINANCE_API_SECRET=nouveau_secret
-   ```
-
-### Solution 3 : Exécuter les tests unitaires
-
-```bash
-eval "$(aws configure export-credentials --profile tb-dev --format env)" && php artisan test --filter=Binance
-```
+**Solution** : Limiter la conversion aux assets principaux (BTC, ETH, BNB, stablecoins, etc.) et plafonner à 10 conversions maximum.
 
 ---
 
@@ -222,6 +219,9 @@ alias report-dry='artisan-aws report:daily --dry-run'
 | `app/Console/Commands/RunBot.php` | Correction type Strategy, suppression option verbose |
 | `app/Console/Commands/DailyReport.php` | Suppression option verbose |
 | `app/Services/Binance/BinanceClient.php` | Correction format retour price() |
+| `app/Services/Binance/BinanceService.php` | Ajout array_values() pour klines |
+| `app/DTOs/KlineDTO.php` | Support format associatif de jaggedsoft/php-binance-api |
+| `app/Services/Report/ReportService.php` | Optimisation getPortfolioValue() (limite appels API) |
 | `config/aws.php` | Ajout support profil SSO |
 | `config/services.php` | Ajout sns.enabled |
 | `.claude/docs/tech/aws-cli-setup.md` | Documentation utilisation Laravel avec SSO |

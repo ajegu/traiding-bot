@@ -207,6 +207,14 @@ final class ReportService implements ReportServiceInterface
         $portfolioBalances = [];
         $totalUsdt = 0.0;
 
+        // Assets principaux à convertir en USDT (limiter les appels API)
+        // Sur testnet, il y a des dizaines d'assets de test, on se limite aux principaux
+        $mainAssets = ['BTC', 'ETH', 'BNB', 'USDT', 'USDC', 'BUSD', 'XRP', 'SOL', 'ADA', 'DOGE'];
+
+        // Compteur d'assets convertis (limiter pour éviter les timeouts)
+        $convertedCount = 0;
+        $maxConversions = 10;
+
         foreach ($balances as $balance) {
             $asset = $balance->asset;
             $free = $balance->free;
@@ -221,15 +229,17 @@ final class ReportService implements ReportServiceInterface
             $portfolioBalances[$asset] = $total;
 
             // Calculer la valeur en USDT
-            if ($asset === 'USDT') {
+            if (in_array($asset, ['USDT', 'USDC', 'BUSD', 'TUSD'])) {
+                // Stablecoins : valeur 1:1
                 $totalUsdt += $total;
-            } else {
-                // Récupérer le prix actuel pour convertir en USDT
+            } elseif (in_array($asset, $mainAssets) && $convertedCount < $maxConversions) {
+                // Assets principaux : récupérer le prix
                 try {
                     $symbol = $asset.'USDT';
                     $price = $this->binanceService->getCurrentPrice($symbol);
                     $valueUsdt = $total * $price;
                     $totalUsdt += $valueUsdt;
+                    $convertedCount++;
 
                     Log::debug('Asset value calculated', [
                         'asset' => $asset,
@@ -242,14 +252,15 @@ final class ReportService implements ReportServiceInterface
                         'asset' => $asset,
                         'error' => $e->getMessage(),
                     ]);
-                    // Si on ne peut pas récupérer le prix, on ignore cet asset dans le total
                 }
             }
+            // Les autres assets sont listés mais pas convertis
         }
 
         Log::info('Portfolio value calculated', [
             'total_usdt' => $totalUsdt,
             'assets_count' => count($portfolioBalances),
+            'assets_converted' => $convertedCount,
         ]);
 
         return [

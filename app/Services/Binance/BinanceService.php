@@ -91,9 +91,11 @@ final class BinanceService implements BinanceServiceInterface
             fn () => $this->client->getKlines($symbol, $interval->value, $limit)
         );
 
+        // La bibliothèque retourne un array associatif avec timestamps comme clés
+        // On doit utiliser array_values() pour obtenir les valeurs uniquement
         return array_map(
             fn (array $kline) => KlineDTO::fromBinanceResponse($kline),
-            $klines
+            array_values($klines)
         );
     }
 
